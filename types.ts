@@ -5,7 +5,8 @@ export enum View {
   CREATE_POST = 'CREATE_POST',
   MEDIA_LIBRARY = 'MEDIA_LIBRARY',
   INBOX = 'INBOX',
-  SETTINGS = 'SETTINGS'
+  SETTINGS = 'SETTINGS',
+  EXECUTIVE_REPORTS = 'EXECUTIVE_REPORTS'
 }
 
 export interface NavItem {
@@ -58,4 +59,67 @@ export enum Platform {
   YOUTUBE = 'youtube',
   LINKEDIN = 'linkedin',
   X = 'x'
+}
+
+// Executive Report Types
+export interface ReportSection {
+  id: string;
+  type: 'metrics' | 'chart' | 'text' | 'summary';
+  title: string;
+  order: number;
+  config?: any;
+}
+
+export interface ReportMetric {
+  id: string;
+  name: string;
+  value: number | string;
+  change?: number;
+  category: 'engagement' | 'growth' | 'revenue' | 'performance';
+  enabled: boolean;
+}
+
+export interface ReportBranding {
+  logo?: string;
+  primaryColor: string;
+  secondaryColor: string;
+  companyName: string;
+}
+
+export interface ReportTemplate {
+  id: string;
+  name: string;
+  sections: ReportSection[];
+  metrics: ReportMetric[];
+  branding: ReportBranding;
+  filters: ReportFilters;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ReportFilters {
+  dateRange: { start: Date; end: Date };
+  platforms: Platform[];
+  compareWithPrevious: boolean;
+}
+
+export interface ExecutiveSummary {
+  keyInsights: string[];
+  topPerformers: {
+    platform: Platform;
+    metric: string;
+    value: number;
+    change: number;
+  }[];
+  trends: {
+    title: string;
+    description: string;
+    impact: 'positive' | 'negative' | 'neutral';
+  }[];
+  recommendations: string[];
+  periodComparison: {
+    current: { start: Date; end: Date };
+    previous: { start: Date; end: Date };
+    changes: { metric: string; change: number }[];
+  };
 }
