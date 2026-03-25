@@ -1,4 +1,7 @@
 import app from './app';
+import { SocketService } from './services/SocketService';
+import { initializeWorkers } from './jobs/workers';
+import { queueManager } from './queues/queueManager';
 import { getBackendPort } from './config/runtime';
 import { startDataPruningJob, stopDataPruningJob } from './jobs/dataPruningJob';
 import { startYouTubeSyncJob, stopYouTubeSyncJob } from './jobs/youtubeSyncJob';
@@ -79,6 +82,16 @@ const gracefulShutdown = async (signal: string, exitCode: number = 0): Promise<v
       });
     }
 
+    // Close job queues and workers
+    try {
+      await queueManager.closeAll();
+      logger.info('All queues and workers closed successfully');
+    } catch (error) {
+      logger.error('Failed to close queues', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+
     // Close database connections
     try {
       await prisma.$disconnect();
@@ -151,6 +164,10 @@ process.on('SIGTERM', () => {
  */
 const bootstrap = async (): Promise<void> => {
   try {
+    // Initialize job queue workers
+    logger.info('Initializing job queue workers...');
+    initializeWorkers();
+
     // Start worker monitor
     try {
       await startWorkerMonitor();
@@ -184,7 +201,11 @@ const bootstrap = async (): Promise<void> => {
     // Start HTTP server
     serverInstance = app.listen(PORT, () => {
       logger.info(`🚀 SocialFlow Backend is running on http://localhost:${PORT}`);
+      logger.info('📬 Job Queue System initialized');
     });
+
+    // Initialize Socket.io
+    SocketService.initialize(serverInstance);
 
     // Handle server errors
     serverInstance.on('error', (error: Error) => {
