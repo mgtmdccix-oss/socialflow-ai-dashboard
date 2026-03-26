@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { requestIdMiddleware } from './middleware/requestId';
+import { compressionMiddleware } from './middleware/compression';
 import { errorHandler, notFoundHandler } from './middleware/error';
 import { initRateLimiters, authLimiter, aiLimiter, generalLimiter } from './middleware/rateLimit';
 import authRoutes from './routes/auth';
@@ -25,6 +26,9 @@ const app: Application = express();
 
 // Security middleware
 app.use(helmet());
+
+// Response compression (Gzip/Brotli) — before body parsing so all responses are eligible
+app.use(compressionMiddleware);
 
 // CORS — allow EventSource connections
 app.use(cors());
