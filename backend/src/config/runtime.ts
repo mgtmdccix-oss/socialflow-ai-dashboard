@@ -67,6 +67,13 @@ export interface DataRetentionConfig {
   queueName: string;
 }
 
+export const getAdminIpWhitelist = (): string[] => {
+  return (process.env.ADMIN_IP_WHITELIST ?? '')
+    .split(',')
+    .map((val) => val.trim())
+    .filter(Boolean);
+};
+
 export const getDataRetentionConfig = (): DataRetentionConfig => {
   const mode = (process.env.DATA_RETENTION_MODE ?? 'archive').trim().toLowerCase();
 
