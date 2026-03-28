@@ -5,8 +5,32 @@ import {
   getHealthMonitor,
   getAlertConfigService,
 } from '../services/serviceFactory';
+import { getIntegrationSnapshot } from '../lib/integrationStatus';
 
 const router = Router();
+
+/**
+ * @openapi
+ * /health/readiness:
+ *   get:
+ *     tags: [Health]
+ *     summary: Readiness probe — reports integration enabled/disabled state
+ *     security: []
+ *     responses:
+ *       200:
+ *         description: All required integrations are configured
+ *       503:
+ *         description: One or more integrations are disabled
+ */
+router.get('/readiness', (req, res) => {
+  const integrations = getIntegrationSnapshot();
+  if (!integrations) {
+    return res.status(503).json({ status: 'starting', integrations: [] });
+  }
+  const disabled = integrations.filter((i) => !i.enabled);
+  const status = disabled.length === 0 ? 'ready' : 'degraded';
+  return res.status(disabled.length === 0 ? 200 : 503).json({ status, integrations });
+});
 
 /**
  * @openapi

@@ -15,6 +15,7 @@ import { startHealthMonitoringJob, stopHealthMonitoringJob } from './jobs/health
 import { initializeHealthMonitoring } from './monitoring/healthMonitoringInstance';
 import { createLogger } from './lib/logger';
 import { prisma } from './lib/prisma';
+import { checkIntegrations } from './lib/integrationStatus';
 import { Worker } from 'bullmq';
 import { Server } from 'http';
 import { initSearchIndex } from './services/SearchService';
@@ -229,6 +230,9 @@ process.on('SIGTERM', () => {
  */
 const bootstrap = async (): Promise<void> => {
   try {
+    // Check optional integrations — warns for disabled ones, throws if REQUIRE_INTEGRATIONS policy is violated
+    checkIntegrations();
+
     // Initialize job queue workers
     logger.info('Initializing job queue workers...');
     initializeWorkers();

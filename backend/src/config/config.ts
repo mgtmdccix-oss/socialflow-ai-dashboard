@@ -103,6 +103,12 @@ const envSchema = z.object({
   // ── YouTube Sync ──────────────────────────────────────────────────────────
   YOUTUBE_SYNC_CRON: z.string().default('0 */6 * * *'),
 
+  // ── Required integrations policy ─────────────────────────────────────────
+  // Comma-separated list of integration names that must be configured.
+  // If any listed integration is disabled, startup fails.
+  // Example: REQUIRE_INTEGRATIONS=youtube,tiktok,stripe
+  REQUIRE_INTEGRATIONS: z.string().optional(),
+
   // ── Webhooks ──────────────────────────────────────────────────────────────
   HMAC_TIMESTAMP_TOLERANCE_MS: z.coerce.number().default(300000),
 
